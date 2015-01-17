@@ -1,6 +1,9 @@
 Horn
 ====
 
+Version 0.0.2.
+
+
 Horn is a collection of Hy macros for use with Flask. It will be developed
 further to provide further convenience. It is on a very early stage.
 DO NOT USE IN PRODUCTION.
@@ -19,3 +22,18 @@ Then use the macros in hy using
 
     (require horn.flask)
 
+and then use the route macro.
+
+
+    (route "/" "home.html")
+    (route "/"  (deffun womethods [] ("hello, world")))
+    (route "/" ["GET" "POST"] (deffun wmethods [] ("hello, world")))
+    (route "/" ["GET" "POST"] "templatewmethods.html")
+    (route "/<name>/<address>" "template" [name] [[address "N/A]])
+
+The syntax is for a template:
+    
+    (route *route-endpoint* [*possibly a list of methods*] *template* [*required args*] [*optional args*])
+
+where *optional args* can be of the form [arg1 arg2] for the default value of None
+or [[arg1 42] arg2] where arg1 would have the default value of 42, but arg2 would have the default value of None.
