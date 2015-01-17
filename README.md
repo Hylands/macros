@@ -26,10 +26,10 @@ and then use the route macro.
 
 
     (route "/" "home.html")
-    (route "/"  (deffun womethods [] ("hello, world")))
-    (route "/" ["GET" "POST"] (deffun wmethods [] ("hello, world")))
+    (route "/"  (defn womethods [] ("hello, world")))
+    (route "/" ["GET" "POST"] (defn wmethods [] ("hello, world")))
     (route "/" ["GET" "POST"] "templatewmethods.html")
-    (route "/<name>/<address>" "template" [name] [[address "N/A]])
+    (route "/<name>/<address>" "template.html" [name] [[address "N/A"]])
 
 The syntax is for a template:
     

@@ -13,7 +13,6 @@
   """Define routes for the given function. Can optionally accept methods,
      as app.route in Flask does."""
     (setv g!a [])
-    (print routes methods)
   (if (= 0 (len methods ))
       (for [inroute routes]
         ((. g!a append)
