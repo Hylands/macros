@@ -10,21 +10,30 @@ DO NOT USE IN PRODUCTION.
 
 install with
 
+.. code-block:: sh
+   
     pip install git+git://github.com/Hylands/horn.git
 
 for the very latest version, or
 
+
+.. code-block:: sh
+   
     pip install horn
 
 for the more stable version.
 
 Then use the macros in hy using
 
+.. code-block:: hy
+   
     (require horn.flask)
 
 and then use the route macro.
 
 
+.. code-block:: hy
+   
     (route "/" "home.html")
     (route "/"  (defn womethods [] ("hello, world")))
     (route "/" ["GET" "POST"] (defn wmethods [] ("hello, world")))
@@ -33,6 +42,8 @@ and then use the route macro.
 
 The syntax is for a template:
     
+.. code-block:: hy
+   
     (route *route-endpoint* [*possibly a list of methods*] *template* [*required args*] [*optional args*])
 
 where *optional args* can be of the form [arg1 arg2] for the default value of None
