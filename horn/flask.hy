@@ -1,5 +1,6 @@
 ;;; Hy Horn by Matthías Páll Gissurarson
 ;;; Macros for use with Flask (Flask is Horn in Icelandic)
+
 (import [hy.models.string [HyString]])
 (import [hy.models.expression [HyExpression]])
 (import [hy.models.list [HyList]])
@@ -22,41 +23,6 @@
           `(apply (. ~*app* route) [~inroute] {"methods" [~@methods]}))))
   `(with-decorator ~@g!a ~function))
 
-;; (defmacro/g! gen-route [*app*
-;;                            routes
-;;                            template
-;;                            &optional
-;;                            [args []]
-;;                            [opargs []]
-;;                            [methods []]]
-;;   """Define an route.
-
-;;      Required arguments:
-;;      @routes: The routes to which this route should respond. If only one route,
-;;               it can be a single string.
-;;      @template: the template this route should render.
-     
-;;      &optional:
-;;      @args: The list of required arguments, e.g. ['name']
-;;      @opargs: The list of optional arguments, e.g. ['home'].
-;;               Default values can be given by a two item lists,
-;;               e.g. [['name' 'Matti'] ['home' 'Iceland']]
-;;      @methods: A list of methods, e.g. ['GET' 'POST']
-     
-;;      Example:
-;;             (gen-route *app* '/' 'home.html')
-;;             (gen-route *app* '/<name>' 'home.html' ['name'])
-;;             (gen-route *app* '/<name>/<home>' 'home.html' ['name'] ['home'])
-;;             (gen-route *app* '/<name>/<home>' 'home.html' ['name'] [['home' 'Iceland']])
-;;             (gen-route *app* '/<name>' 'home.html' ['name'] [])
-;;  """
-;;   ;; (if (coll? routes) ; Should be this, but this breaks in macros. See #758
-;;   (if (= (len (str methods)) (len methods))
-;;       (setv g!c [methods])
-;;       (setv g!c methods))
-;;   `(gen-funroutes ~*app* [~@g!b]
-;;      (defn ~g!a [~@args &optional ~@opargs]
-;;        (apply render-template [~template] (locals))) [~@g!c]))
 
 
 (defmacro/g! gen-template-route [*app* routes methods template 
@@ -75,6 +41,32 @@
    ))
 
 (defmacro/g! gen-route [*app* routes templateorfunormethods &rest rest]
+   """Define an route.
+
+      Required arguments:
+      @routes: The routes to which this route should respond. If only one route,
+               it can be a single string.
+      @templateorfunormethods: one of:
+             @methods:  A list of methods, e.g. ['GET' 'POST']
+             @template: the template this route should render.
+             @function: the function that is bound to this route. 
+      if templateorfunormethods are methods, then the next arg should be a
+          template or a function
+
+      For templates:
+      &optional:
+      @args: The list of required arguments, e.g. ['name']
+      @opargs: The list of optional arguments, e.g. ['home'].
+               Default values can be given by a two item lists,
+               e.g. [['name' 'Matti'] ['home' 'Iceland']]
+   
+      Example:
+             (gen-route *app* '/' 'home.html')
+             (gen-route *app* '/<name>' 'home.html' ['name'])
+             (gen-route *app* '/<name>/<home>' 'home.html' ['name'] ['home'])
+             (gen-route *app* '/<name>/<home>' 'home.html' ['name'] [['home' 'Iceland']])
+             (gen-route *app* '/<name>' ['GET' 'POST'] 'home.html' ['name'] [])
+  """
   (if (is (type routes) HyList) ; should be coll? but bug :/
            (setv g!routes routes)
            (setv g!routes [routes]))
