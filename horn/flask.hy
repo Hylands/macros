@@ -1,90 +1,88 @@
 ;;; Hy Horn by Matthías Páll Gissurarson
 ;;; Macros for use with Flask (Flask is Horn in Icelandic)
+(import [hy.models.string [HyString]])
+(import [hy.models.expression [HyExpression]])
+(import [hy.models.list [HyList]])
 
-(defmacro gen-defroute [*app*
-                        route
-                        function
-                        &optional
-                        [methods []]]
-  """Defines a route in *app* for the given function. Can optionally accept methods,
-     as app.route in Flask does."""
-  (if (= 0 (len methods))
-    `(with-decorator ((. ~*app* route) ~route) ~function)
-    `(with-decorator (apply (. *app* route) [~route] {"methods" [~@methods]})
-       ~function)))
+(require horn.macros)
 
-;;; Wrapper with *app* default
-(defmacro defroute [route function &optional [methods []]]
-     `(gen-defroute *app* ~route ~function [~@methods]))
-
-(defmacro/g! gen-defroutes [*app*
+(defmacro/g! gen-funroutes [*app*
                             routes
-                            function
-                            &optional
-                            [methods []]]
+                            methods
+                            function]
   """Define routes for the given function. Can optionally accept methods,
      as app.route in Flask does."""
-  (setv g!a [])
-  (if (= 0 (len methods))
-      (for [route routes]
+    (setv g!a [])
+    (print routes methods)
+  (if (= 0 (len methods ))
+      (for [inroute routes]
         ((. g!a append)
-         `((. ~*app* route) ~route)))
-       (for [route routes]
+         `((. ~*app* route) ~inroute)))
+       (for [inroute routes]
          ((. g!a append)
-          `(apply (. ~*app* route) [~route] {"methods" [~@methods]}))))
+          `(apply (. ~*app* route) [~inroute] {"methods" [~@methods]}))))
   `(with-decorator ~@g!a ~function))
 
+;; (defmacro/g! gen-route [*app*
+;;                            routes
+;;                            template
+;;                            &optional
+;;                            [args []]
+;;                            [opargs []]
+;;                            [methods []]]
+;;   """Define an route.
+
+;;      Required arguments:
+;;      @routes: The routes to which this route should respond. If only one route,
+;;               it can be a single string.
+;;      @template: the template this route should render.
+     
+;;      &optional:
+;;      @args: The list of required arguments, e.g. ['name']
+;;      @opargs: The list of optional arguments, e.g. ['home'].
+;;               Default values can be given by a two item lists,
+;;               e.g. [['name' 'Matti'] ['home' 'Iceland']]
+;;      @methods: A list of methods, e.g. ['GET' 'POST']
+     
+;;      Example:
+;;             (gen-route *app* '/' 'home.html')
+;;             (gen-route *app* '/<name>' 'home.html' ['name'])
+;;             (gen-route *app* '/<name>/<home>' 'home.html' ['name'] ['home'])
+;;             (gen-route *app* '/<name>/<home>' 'home.html' ['name'] [['home' 'Iceland']])
+;;             (gen-route *app* '/<name>' 'home.html' ['name'] [])
+;;  """
+;;   ;; (if (coll? routes) ; Should be this, but this breaks in macros. See #758
+;;   (if (= (len (str methods)) (len methods))
+;;       (setv g!c [methods])
+;;       (setv g!c methods))
+;;   `(gen-funroutes ~*app* [~@g!b]
+;;      (defn ~g!a [~@args &optional ~@opargs]
+;;        (apply render-template [~template] (locals))) [~@g!c]))
+
+
+(defmacro/g! gen-template-route [*app* routes methods template 
+                                 &optional [args ()] [opargs ()]]
+  `(gen-route ~*app* ~routes ~methods
+              (defn ~g!funname [~@args &optional ~@opargs]
+                (apply render-template [~template] (locals)))))
+
+(defmacro/g! gen-method-routes [*app* routes methods templateorfun &rest rest]
+  (switch (type templateorfun)
+   (is HyString) ; it's a template
+   `(gen-template-route *app* [~@routes] [~@methods]  ~templateorfun ~@rest)
+   (is  HyExpression) ; it's a function
+   `(gen-funroutes *app* [~@routes] [~@methods] ~templateorfun ~@rest)
+   (raise (Exception "No match for route"))
+   ))
+
+(defmacro/g! gen-route [*app* routes templateorfunormethods &rest rest]
+  (if (is (type routes) HyList) ; should be coll? but bug :/
+           (setv g!routes routes)
+           (setv g!routes [routes]))
+  (if (is (type templateorfunormethods) HyList) ; it's a list of methods
+   `(gen-method-routes *app* [~@g!routes] ~templateorfunormethods ~@rest)
+   `(gen-method-routes *app* [~@g!routes] [] ~templateorfunormethods ~@rest)))
+
+
 ;;; Wrapper with *app* default
-(defmacro/g! defroutes [routes function &optional [methods []]]
-     `(gen-defroutes *app* ~routes ~function [~@methods]))
-     
-
-
-(defmacro/g! gen-endpoint [*app*
-                           routes
-                           template
-                           &optional
-                           [args []]
-                           [opargs []]
-                           [methods []]]
-  """Define an endpoint.
-
-     Required arguments:
-     @routes: The routes to which this endpoint should respond. If only one route,
-              it can be a single string.
-     @template: the template this route should render.
-     
-     &optional:
-     @args: The list of required arguments, e.g. ['name']
-     @opargs: The list of optional arguments, e.g. ['home'].
-              Default values can be given by a two item lists,
-              e.g. [['name' 'Matti'] ['home' 'Iceland']]
-     @methods: A list of methods, e.g. ['GET' 'POST']
-     
-     Example:
-            (gen-endpoint *app* '/' 'home.html')
-            (gen-endpoint *app* '/<name>' 'home.html' ['name'])
-            (gen-endpoint *app* '/<name>/<home>' 'home.html' ['name'] ['home'])
-            (gen-endpoint *app* '/<name>/<home>' 'home.html' ['name'] [['home' 'Iceland']])
-            (gen-endpoint *app* '/<name>' 'home.html' ['name'] [])
- """
-  ;; (if (coll? routes) ; Should be this, but this breaks in macros. See #758
-  (if (= (len (str routes)) (len routes)) ; str is idempotent for strings, but not lists.
-      (setv g!b [routes])
-      (setv g!b routes))
-  (if (= (len (str methods)) (len methods))
-      (setv g!c [methods])
-      (setv g!c methods))
-  `(gen-defroutes ~*app* [~@g!b]
-     (defn ~g!a [~@args &optional ~@opargs]
-       (apply render-template [~template] (locals))) [~@g!c]))
-
-;;; Wrapper with *app* default
-(defmacro/g! endpoint [routes template &optional [args []] [opargs []] [methods []]]
-  (if (= (len (str routes)) (len routes)) ; str is idempotent for strings, but not lists.
-      (setv g!b [routes])
-      (setv g!b routes))
-  (if (= (len (str methods)) (len methods))
-      (setv g!c [methods])
-      (setv g!c methods))
-  `(gen-endpoint *app* ~routes ~template [~@args] [~@opargs] [~@g!c]))
+(defmacro/g! route [&rest rest] `(gen-route *app* ~@rest))
