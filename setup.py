@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 from distutils.core import setup, Extension
 
-setup(name="Horn",
-      version="0.0.2",
-      description="A collection of Flask Macros for Hy",
+setup(name="macros",
+      version="0.0.1",
+      description="A collection of Macros for Hy",
       author="Matthias Pall Gissurarson",
-      url="https://github.com/Hylands/horn",
+      url="https://github.com/Hylands/macros",
       license='MIT',
-      packages=["horn"],
-      package_data={"horn":["flask.hy", "macros.hy"]},
+      packages=["macros"],
+      package_data={"macros":["flask.hy", "flow.hy"]},
       install_requires=["hy"],
     )
