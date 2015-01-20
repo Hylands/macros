@@ -1,11 +1,11 @@
-;;; Hy Horn by Matthías Páll Gissurarson
-;;; Macros for use with Flask (Flask is Horn in Icelandic)
+;;; Hy Flask Macros by Matthías Páll Gissurarson
+;;; Macros for use with Flask.
 
 (import [hy.models.string [HyString]])
 (import [hy.models.expression [HyExpression]])
 (import [hy.models.list [HyList]])
 
-(require horn.macros)
+(require macros.flow)
 
 (defmacro/g! gen-funroutes [*app*
                             routes

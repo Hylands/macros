@@ -1,10 +1,10 @@
-Horn
+Macros
 ====
 
-Version 0.0.2.
+Version 0.0.1.
 
 
-Horn is a collection of Hy macros for use with Flask. It will be developed
+Macros is a collection of Hy macros. It will be developed
 further to provide further convenience. It is on a very early stage.
 DO NOT USE IN PRODUCTION.
 
@@ -12,14 +12,14 @@ install with
 
 .. code-block:: sh
    
-    pip install git+git://github.com/Hylands/horn.git
+    pip install git+git://github.com/Hylands/macros.git
 
 for the very latest version, or
 
 
 .. code-block:: sh
    
-    pip install horn
+    pip install macros
 
 for the more stable version.
 
@@ -27,8 +27,8 @@ Then use the macros in hy using
 
 .. code-block:: hy
    
-    (require horn.flask)
-
+    (require macros.flask)
+    (require macros.flow)
 and then use the route macro.
 
 
