@@ -1,7 +1,7 @@
 Macros
-====
+======
 
-Version 0.0.1.
+Version 0.0.2.
 
 
 Macros is a collection of Hy macros. It will be developed
