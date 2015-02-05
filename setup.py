@@ -8,6 +8,6 @@ setup(name="macros",
       url="https://github.com/Hylands/macros",
       license='MIT',
       packages=["macros"],
-      package_data={"macros":["flask.hy", "flow.hy","bindings"]},
+      package_data={"macros":["flask.hy", "flow.hy","bindings.hy"]},
       install_requires=["hy"],
     )
